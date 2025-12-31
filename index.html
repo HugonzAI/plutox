@@ -32,7 +32,10 @@
     }
     ul {
       padding-left: 1.2rem;
+      margin: 0;
     }
+
+    /* Hero */
     .hero {
       display: grid;
       grid-template-columns: 1.1fr 0.9fr;
@@ -44,34 +47,60 @@
     .hero img {
       width: 100%;
       border-radius: 12px;
+      display: block;
     }
     .tagline {
       font-size: 1.3rem;
       color: #444;
+      margin-top: 0;
     }
+
+    /* Sections */
     .block {
       margin-top: 60px;
       padding-top: 20px;
     }
+
+    /* CTA (Option A) */
     .cta {
       margin-top: 80px;
-      padding: 36px;
+      padding: 40px;
       background: #111;
       color: #fff;
       border-radius: 12px;
     }
+    .cta h2 {
+      margin: 0 0 12px 0;
+      font-size: 2rem;
+    }
+    .cta-desc {
+      color: #ddd;
+      font-size: 1.1rem;
+      margin: 0;
+    }
+    .cta-action {
+      margin-top: 24px;
+      font-size: 1.1rem;
+      margin-bottom: 0;
+    }
     .cta a {
       color: #fff;
+      font-weight: 600;
       text-decoration: underline;
     }
+
     footer {
       margin-top: 80px;
       font-size: 0.9rem;
       color: #666;
     }
+
     @media (max-width: 768px) {
       .hero {
         grid-template-columns: 1fr;
+      }
+      .container {
+        padding: 56px 18px;
       }
     }
   </style>
@@ -84,17 +113,13 @@
     <section class="hero">
       <div>
         <h1>Plutox</h1>
-        <p class="tagline">
-          A system for freezing hard decisions.
-        </p>
+        <p class="tagline">A system for freezing hard decisions.</p>
         <p>
-          Plutox is not a chat bot.
-          It is a decision framework designed to turn uncertainty
+          Plutox is not a chat bot. It is a decision framework designed to turn uncertainty
           into a clear commitment — with trade-offs made explicit.
         </p>
       </div>
       <div>
-        <!-- 保留这一张你确认可显示的图片 -->
         <img
           src="https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=900&q=80"
           alt="Abstract decision making"
@@ -106,8 +131,7 @@
     <section class="block">
       <h2>The real problem</h2>
       <p>
-        Most people don’t lack information.
-        They lack the ability to <strong>freeze a decision</strong>
+        Most people don’t lack information. They lack the ability to <strong>freeze a decision</strong>
         and accept its consequences.
       </p>
       <p>
@@ -135,21 +159,20 @@
       </ul>
     </section>
 
-    <!-- CTA -->
+    <!-- CTA (Option A) -->
     <section class="cta">
       <h2>Coming soon</h2>
-      <p>
-        Decision freezing for career moves, projects,
-        life changes, and long-term commitments.
+      <p class="cta-desc">
+        Plutox helps people freeze hard decisions — for career moves, projects, life changes,
+        and long-term commitments.
       </p>
-      <p>
-        Early access: <a href="mailto:guo168yu@gmail.com">guo168yu@gmail.com</a>
+      <p class="cta-action">
+        Get early access:<br />
+        <a href="mailto:guo168yu@gmail.com">guo168yu@gmail.com</a>
       </p>
     </section>
 
-    <footer>
-      © Plutox
-    </footer>
+    <footer>© Plutox</footer>
 
   </div>
 </body>
