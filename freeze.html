@@ -1,136 +1,158 @@
-export async function onRequestPost(context) {
-  const { request, env } = context;
-
-  if (!env.OPENAI_API_KEY) {
-    return new Response("Missing OPENAI_API_KEY", { status: 500 });
-  }
-
-  let payload;
-  try {
-    payload = await request.json();
-  } catch {
-    return new Response("Invalid JSON body", { status: 400 });
-  }
-
-  const {
-    decision = "",
-    optionA = "",
-    optionB = "",
-    horizon = "",
-    nonnegotiables = "",
-    constraints = "",
-    fears = "",
-    goal = ""
-  } = payload;
-
-  if (!decision || !optionA || !optionB || !horizon) {
-    return new Response("Missing required fields: decision, optionA, optionB, horizon", { status: 400 });
-  }
-
-  const system = `
-You are Plutox, a Decision Freezer.
-Freeze a decision into a single executable commitment.
-Be direct, specific, and opinionated. No vague advice.
-
-Return ONLY valid JSON (no markdown, no backticks), matching this schema:
-{
-  "decision": "string",
-  "summary": "string",
-  "assumptions": ["string"],
-  "tradeoffs": ["string"],
-  "next7days": ["string"],
-  "fallback": "string"
-}
-`.trim();
-
-  const user = `
-Decision statement: ${decision}
-
-Option A: ${optionA}
-Option B: ${optionB}
-
-Time horizon: ${horizon}
-
-Non-negotiables: ${nonnegotiables || "(none)"}
-Constraints: ${constraints || "(none)"}
-Biggest fears: ${fears || "(none)"}
-Primary goal: ${goal || "(none)"}
-
-Rules:
-- Pick ONE option (A or B). No "it depends".
-- Make trade-offs explicit.
-- Next7days must be actionable.
-- If info is missing, make reasonable assumptions and list them.
-`.trim();
-
-  const resp = await fetch("https://api.openai.com/v1/responses", {
-    method: "POST",
-    headers: {
-      "Authorization": `Bearer ${env.OPENAI_API_KEY}`,
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      model: env.OPENAI_MODEL || "gpt-4.1-mini",
-      input: [
-        { role: "system", content: system },
-        { role: "user", content: user }
-      ],
-      max_output_tokens: 700
-    })
-  });
-
-  if (!resp.ok) {
-    const errText = await resp.text();
-    return new Response(`OpenAI error (${resp.status}): ${errText}`, { status: 502 });
-  }
-
-  const data = await resp.json();
-  const text = extractTextFromResponses(data);
-
-  let out;
-  try {
-    out = JSON.parse(text);
-  } catch {
-    const json = extractFirstJsonObject(text);
-    if (!json) return new Response(`Model did not return JSON. Raw:\n${text}`, { status: 502 });
-    try { out = JSON.parse(json); } catch { return new Response(`Failed to parse JSON. Raw:\n${text}`, { status: 502 }); }
-  }
-
-  if (!out || typeof out !== "object" || typeof out.decision !== "string") {
-    return new Response(`Invalid output shape. Raw:\n${text}`, { status: 502 });
-  }
-
-  return new Response(JSON.stringify(out), {
-    status: 200,
-    headers: {
-      "Content-Type": "application/json; charset=utf-8",
-      "Cache-Control": "no-store"
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Plutox — Freeze a Decision</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    body { margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; background:#fafafa; color:#111; }
+    .container { max-width: 960px; margin: 0 auto; padding: 60px 20px; }
+    h1 { margin: 0 0 12px; }
+    p { color:#333; }
+    label { display:block; margin: 16px 0 6px; font-weight: 600; }
+    input, textarea {
+      width:100%; box-sizing:border-box; padding:12px; border:1px solid #ddd; border-radius:10px; background:#fff;
+      font: inherit;
     }
-  });
-}
-
-function extractTextFromResponses(data) {
-  const output = Array.isArray(data?.output) ? data.output : [];
-  for (const item of output) {
-    const content = Array.isArray(item?.content) ? item.content : [];
-    for (const c of content) {
-      if (typeof c?.text === "string") return c.text;
-      if (typeof c?.content === "string") return c.content;
+    textarea { min-height: 100px; resize: vertical; }
+    .row { display:grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    @media (max-width: 700px){ .row{ grid-template-columns: 1fr; } }
+    button {
+      margin-top: 18px; padding: 12px 16px; border: 0; border-radius: 10px;
+      background:#111; color:#fff; font-weight: 700; cursor:pointer;
     }
-  }
-  if (typeof data?.output_text === "string") return data.output_text;
-  return "";
-}
+    button:disabled { opacity: .6; cursor: not-allowed; }
+    .card {
+      margin-top: 26px; background:#fff; border:1px solid #eee; border-radius: 12px; padding: 18px;
+    }
+    .muted { color:#666; }
+    pre { white-space: pre-wrap; word-wrap: break-word; background:#0f0f0f; color:#fff; padding:14px; border-radius: 10px; overflow:auto; }
+    .grid2 { display:grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    @media (max-width: 700px){ .grid2{ grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Freeze a decision</h1>
+    <p class="muted">Structured input → AI output (Decision Freeze Report).</p>
 
-function extractFirstJsonObject(s) {
-  const start = s.indexOf("{");
-  if (start === -1) return null;
-  let depth = 0;
-  for (let i = start; i < s.length; i++) {
-    const ch = s[i];
-    if (ch === "{") depth++;
-    if (ch === "}") depth--;
-    if (depth === 0) return s.slice(start, i + 1);
-  }
-  return null;
-}
+    <form id="freezeForm" class="card">
+      <label>Decision statement</label>
+      <textarea name="decision" required placeholder="e.g., Should I accept the new role or stay in my current job?"></textarea>
+
+      <div class="row">
+        <div>
+          <label>Option A</label>
+          <input name="optionA" required placeholder="e.g., Accept the new role" />
+        </div>
+        <div>
+          <label>Option B</label>
+          <input name="optionB" required placeholder="e.g., Stay in current role" />
+        </div>
+      </div>
+
+      <label>Time horizon (when you’ll judge success)</label>
+      <input name="horizon" required placeholder="e.g., 6 months" />
+
+      <label>Non-negotiables</label>
+      <textarea name="nonnegotiables" placeholder="e.g., Must not relocate; Must not exceed 45 hrs/week"></textarea>
+
+      <label>Constraints</label>
+      <textarea name="constraints" placeholder="e.g., Limited savings; Need childcare coverage"></textarea>
+
+      <label>Biggest fears</label>
+      <textarea name="fears" placeholder="e.g., Regret; burnout; instability"></textarea>
+
+      <label>Primary goal</label>
+      <textarea name="goal" placeholder="e.g., Long-term growth without sacrificing family time"></textarea>
+
+      <button id="submitBtn" type="submit">Freeze this decision</button>
+      <p id="status" class="muted"></p>
+    </form>
+
+    <div id="result" class="card" style="display:none;"></div>
+  </div>
+
+  <script>
+    const form = document.getElementById('freezeForm');
+    const btn = document.getElementById('submitBtn');
+    const statusEl = document.getElementById('status');
+    const resultEl = document.getElementById('result');
+
+    function esc(s){ return (s ?? '').toString().replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      resultEl.style.display = 'none';
+      statusEl.textContent = '';
+      btn.disabled = true;
+      btn.textContent = 'Freezing...';
+
+      const data = Object.fromEntries(new FormData(form).entries());
+
+      try {
+        statusEl.textContent = 'Calling the agent...';
+        const resp = await fetch('/api/freeze', {
+          method: 'POST',
+          headers: {'Content-Type':'application/json'},
+          body: JSON.stringify(data)
+        });
+
+        if (!resp.ok) {
+          const txt = await resp.text();
+          throw new Error(`API error (${resp.status}): ${txt}`);
+        }
+
+        const out = await resp.json();
+        render(out);
+      } catch (err) {
+        statusEl.textContent = 'Error: ' + (err?.message || err);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Freeze this decision';
+      }
+    });
+
+    function render(out){
+      const decision = out.decision || '(no decision)';
+      const summary = out.summary || '';
+      const assumptions = Array.isArray(out.assumptions) ? out.assumptions : [];
+      const tradeoffs = Array.isArray(out.tradeoffs) ? out.tradeoffs : [];
+      const next7days = Array.isArray(out.next7days) ? out.next7days : [];
+      const fallback = out.fallback || '';
+
+      const li = (arr) => arr.map(x => `<li>${esc(x)}</li>`).join('');
+
+      resultEl.innerHTML = `
+        <h2 style="margin-top:0;">Frozen decision</h2>
+        <p style="font-size:1.15rem;"><strong>${esc(decision)}</strong></p>
+        ${summary ? `<p class="muted">${esc(summary)}</p>` : ''}
+
+        <div class="grid2">
+          <div>
+            <h3>Assumptions</h3>
+            <ul>${assumptions.length ? li(assumptions) : '<li class="muted">None provided</li>'}</ul>
+          </div>
+          <div>
+            <h3>Trade-offs</h3>
+            <ul>${tradeoffs.length ? li(tradeoffs) : '<li class="muted">None provided</li>'}</ul>
+          </div>
+        </div>
+
+        <h3>Next 7 days plan</h3>
+        <ol>${next7days.length ? next7days.map(x => `<li>${esc(x)}</li>`).join('') : '<li class="muted">None provided</li>'}</ol>
+
+        ${fallback ? `<h3>If wrong, fallback</h3><p>${esc(fallback)}</p>` : ''}
+
+        <details style="margin-top:14px;">
+          <summary class="muted">Raw JSON</summary>
+          <pre>${esc(JSON.stringify(out, null, 2))}</pre>
+        </details>
+      `;
+      resultEl.style.display = 'block';
+      statusEl.textContent = 'Done.';
+      resultEl.scrollIntoView({behavior:'smooth', block:'start'});
+    }
+  </script>
+</body>
+</html>
