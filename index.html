@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <title>Plutox — Decision Freezer</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
   <style>
     body {
       margin: 0;
@@ -12,27 +13,31 @@
       color: #111;
       line-height: 1.6;
     }
+
     .container {
       max-width: 960px;
       margin: 0 auto;
       padding: 80px 24px;
     }
+
     h1 {
       font-size: 2.6rem;
-      margin-bottom: 1rem;
+      margin-bottom: 0.5rem;
     }
+
     h2 {
       margin-top: 3rem;
       font-size: 1.8rem;
     }
+
     p {
       font-size: 1.1rem;
       margin-bottom: 1rem;
       color: #333;
     }
+
     ul {
       padding-left: 1.2rem;
-      margin: 0;
     }
 
     /* Hero */
@@ -44,24 +49,49 @@
       padding-bottom: 60px;
       border-bottom: 1px solid #ddd;
     }
+
     .hero img {
       width: 100%;
       border-radius: 12px;
       display: block;
     }
+
     .tagline {
       font-size: 1.3rem;
       color: #444;
       margin-top: 0;
     }
- 
+
+    /* CTA Button */
+    .cta-button {
+      display: inline-block;
+      margin-top: 20px;
+      padding: 14px 22px;
+      background: #111;
+      color: #fff;
+      font-size: 1.05rem;
+      font-weight: 700;
+      border-radius: 10px;
+      text-decoration: none;
+      transition: background 0.2s ease, transform 0.1s ease;
+    }
+
+    .cta-button:hover {
+      background: #000;
+      transform: translateY(-1px);
+    }
+
+    .cta-button:active {
+      transform: translateY(0);
+    }
+
     /* Sections */
     .block {
       margin-top: 60px;
       padding-top: 20px;
     }
 
-    /* CTA (Option A) */
+    /* Bottom CTA */
     .cta {
       margin-top: 80px;
       padding: 40px;
@@ -69,20 +99,23 @@
       color: #fff;
       border-radius: 12px;
     }
+
     .cta h2 {
-      margin: 0 0 12px 0;
+      margin-top: 0;
       font-size: 2rem;
     }
+
     .cta-desc {
       color: #ddd;
       font-size: 1.1rem;
-      margin: 0;
+      margin-top: 12px;
     }
+
     .cta-action {
       margin-top: 24px;
       font-size: 1.1rem;
-      margin-bottom: 0;
     }
+
     .cta a {
       color: #fff;
       font-weight: 600;
@@ -114,11 +147,19 @@
       <div>
         <h1>Plutox</h1>
         <p class="tagline">A system for freezing hard decisions.</p>
+
         <p>
-          Plutox is not a chat bot. It is a decision framework designed to turn uncertainty
+          Plutox is not a chat bot.
+          It is a decision framework designed to turn uncertainty
           into a clear commitment — with trade-offs made explicit.
         </p>
+
+        <!-- Visible CTA Button -->
+        <a href="/freeze" class="cta-button">
+          Freeze a decision →
+        </a>
       </div>
+
       <div>
         <img
           src="https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=900&q=80"
@@ -126,17 +167,13 @@
         />
       </div>
     </section>
-<p>
-  <a href="/freeze" style="font-weight:700; text-decoration: underline; color:#111;">
-    Freeze a decision →
-  </a>
-</p>
 
     <!-- Problem -->
     <section class="block">
       <h2>The real problem</h2>
       <p>
-        Most people don’t lack information. They lack the ability to <strong>freeze a decision</strong>
+        Most people don’t lack information.
+        They lack the ability to <strong>freeze a decision</strong>
         and accept its consequences.
       </p>
       <p>
@@ -164,12 +201,12 @@
       </ul>
     </section>
 
-    <!-- CTA (Option A) -->
+    <!-- Bottom CTA -->
     <section class="cta">
       <h2>Coming soon</h2>
       <p class="cta-desc">
-        Plutox helps people freeze hard decisions — for career moves, projects, life changes,
-        and long-term commitments.
+        Plutox helps people freeze hard decisions — for career moves,
+        projects, life changes, and long-term commitments.
       </p>
       <p class="cta-action">
         Get early access:<br />
