@@ -48,6 +48,7 @@
       margin-top: 10px;
     }
     .q-list { margin: 10px 0 0; padding-left: 18px; }
+    a.link { color:#111; font-weight:700; text-decoration: underline; }
   </style>
 </head>
 <body>
@@ -55,11 +56,12 @@
     <div>
       <span class="pill">Plutox</span><span class="pill">Decision Freezer</span>
       <h1>Make sense → Freeze</h1>
-      <p class="muted">Step 1: brain-dump. Step 2: Plutox organizes. Step 3: freeze a decision with trade-offs and a 7-day plan.</p>
+      <p class="muted">Step 1: brain-dump. Step 2: Plutox organizes. Step 3: freeze with trade-offs and a 7-day plan.</p>
+      <p class="muted"><a class="link" href="/">← Back</a></p>
     </div>
 
     <!-- Step 1: Free-write -->
-    <div class="card">
+    <div class="card" id="start">
       <h2 style="margin-top:0;">1) Free-write</h2>
       <p class="muted">Write freely. No structure required.</p>
 
@@ -68,7 +70,7 @@ Messy thoughts are welcome.
 You can rant, repeat yourself, or contradict yourself."></textarea>
 
       <div class="actions">
-        <button id="btnOrganize">Organize my thoughts →</button>
+        <button id="btnOrganize" type="button">Organize my thoughts →</button>
         <button id="btnClear" class="secondary" type="button">Clear</button>
         <span id="status1" class="muted"></span>
       </div>
@@ -80,7 +82,8 @@ You can rant, repeat yourself, or contradict yourself."></textarea>
     </div>
 
     <!-- Step 2: Structured form (auto-filled) -->
-    <form id="freezeForm" class="card">
+    <!-- IMPORTANT: hidden by default -->
+    <form id="freezeForm" class="card" style="display:none;">
       <h2 style="margin-top:0;">2) Confirm structure</h2>
       <p class="muted">Plutox filled this. You can adjust anything before freezing.</p>
 
@@ -115,6 +118,7 @@ You can rant, repeat yourself, or contradict yourself."></textarea>
 
       <div class="actions">
         <button id="btnFreeze" type="submit">Freeze this decision</button>
+        <button id="btnHide" class="secondary" type="button">Hide form</button>
         <span id="status2" class="muted"></span>
       </div>
     </form>
@@ -133,6 +137,7 @@ You can rant, repeat yourself, or contradict yourself."></textarea>
 
     const form = document.getElementById('freezeForm');
     const btnFreeze = document.getElementById('btnFreeze');
+    const btnHide = document.getElementById('btnHide');
     const status2 = document.getElementById('status2');
     const resultEl = document.getElementById('result');
 
@@ -141,7 +146,7 @@ You can rant, repeat yourself, or contradict yourself."></textarea>
 
     function esc(s){ return (s ?? '').toString().replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
 
-    // Restore free-write from index.html
+    // Restore free-write from homepage
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
       if (saved) freewrite.value = saved;
@@ -157,6 +162,14 @@ You can rant, repeat yourself, or contradict yourself."></textarea>
       status1.textContent = "";
       missingBox.style.display = "none";
       missingQs.innerHTML = "";
+      resultEl.style.display = "none";
+      form.style.display = "none";
+      status2.textContent = "";
+    });
+
+    btnHide.addEventListener("click", () => {
+      form.style.display = "none";
+      status2.textContent = "";
     });
 
     btnOrganize.addEventListener('click', async () => {
@@ -170,9 +183,13 @@ You can rant, repeat yourself, or contradict yourself."></textarea>
         return;
       }
 
+      // disable UI while calling
       btnOrganize.disabled = true;
       btnClear.disabled = true;
-      status1.textContent = "Organizing… (this should be quick)";
+      btnFreeze.disabled = true;
+      btnHide.disabled = true;
+
+      status1.textContent = "Reading and organizing your thoughts…";
 
       try {
         const resp = await fetch('/api/organize', {
@@ -188,18 +205,21 @@ You can rant, repeat yourself, or contradict yourself."></textarea>
 
         const out = await resp.json();
         fillForm(out);
-        status1.textContent = "Done. Please confirm the structure below.";
+
+        status1.textContent = "Done. Confirm the structure below.";
         form.scrollIntoView({behavior:'smooth', block:'start'});
       } catch (err) {
         status1.textContent = "Error: " + (err?.message || err);
       } finally {
         btnOrganize.disabled = false;
         btnClear.disabled = false;
+        btnFreeze.disabled = false;
+        btnHide.disabled = false;
       }
     });
 
     function fillForm(o){
-      // Fill fields, tolerate missing values
+      // Fill fields
       form.elements.decision.value = o.decision || "";
       form.elements.optionA.value = o.optionA || "";
       form.elements.optionB.value = o.optionB || "";
@@ -209,11 +229,18 @@ You can rant, repeat yourself, or contradict yourself."></textarea>
       form.elements.fears.value = o.fears || "";
       form.elements.goal.value = o.goal || "";
 
+      // Show optional questions
       const qs = Array.isArray(o.missing_questions) ? o.missing_questions : [];
       if (qs.length) {
         missingQs.innerHTML = qs.map(q => `<li>${esc(q)}</li>`).join("");
         missingBox.style.display = "block";
+      } else {
+        missingBox.style.display = "none";
+        missingQs.innerHTML = "";
       }
+
+      // ⭐ KEY CHANGE: show form only after organize
+      form.style.display = "block";
     }
 
     form.addEventListener('submit', async (e) => {
@@ -224,6 +251,8 @@ You can rant, repeat yourself, or contradict yourself."></textarea>
       btnFreeze.disabled = true;
       btnOrganize.disabled = true;
       btnClear.disabled = true;
+      btnHide.disabled = true;
+
       status2.textContent = "Freezing…";
 
       const data = Object.fromEntries(new FormData(form).entries());
@@ -249,6 +278,7 @@ You can rant, repeat yourself, or contradict yourself."></textarea>
         btnFreeze.disabled = false;
         btnOrganize.disabled = false;
         btnClear.disabled = false;
+        btnHide.disabled = false;
       }
     });
 
