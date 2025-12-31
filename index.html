@@ -62,17 +62,60 @@
       margin-top: 0;
     }
 
-    /* CTA Button */
+    /* Free-write card */
+    .freewrite {
+      margin-top: 18px;
+      background: #fff;
+      border: 1px solid #eee;
+      border-radius: 12px;
+      padding: 16px;
+    }
+
+    .freewrite-label {
+      font-weight: 700;
+      font-size: 1rem;
+      margin: 0 0 8px 0;
+      color: #111;
+    }
+
+    .freewrite-sub {
+      margin: 0 0 12px 0;
+      color: #555;
+      font-size: 0.98rem;
+    }
+
+    .freewrite textarea {
+      width: 100%;
+      box-sizing: border-box;
+      min-height: 180px;
+      padding: 14px;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      font: inherit;
+      resize: vertical;
+      background: #fff;
+    }
+
+    .freewrite-actions {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      margin-top: 14px;
+      flex-wrap: wrap;
+    }
+
+    /* Primary CTA button (visible) */
     .cta-button {
       display: inline-block;
-      margin-top: 20px;
-      padding: 14px 22px;
+      padding: 14px 18px;
       background: #111;
       color: #fff;
-      font-size: 1.05rem;
+      font-size: 1.02rem;
       font-weight: 700;
       border-radius: 10px;
       text-decoration: none;
+      border: 0;
+      cursor: pointer;
       transition: background 0.2s ease, transform 0.1s ease;
     }
 
@@ -83,6 +126,21 @@
 
     .cta-button:active {
       transform: translateY(0);
+    }
+
+    /* Secondary action */
+    .secondary-link {
+      font-weight: 700;
+      color: #111;
+      text-decoration: underline;
+      cursor: pointer;
+    }
+
+    .hint {
+      width: 100%;
+      margin-top: 8px;
+      font-size: 0.92rem;
+      color: #666;
     }
 
     /* Sections */
@@ -103,6 +161,7 @@
     .cta h2 {
       margin-top: 0;
       font-size: 2rem;
+      color: #fff;
     }
 
     .cta-desc {
@@ -135,6 +194,9 @@
       .container {
         padding: 56px 18px;
       }
+      .freewrite textarea {
+        min-height: 200px;
+      }
     }
   </style>
 </head>
@@ -154,10 +216,31 @@
           into a clear commitment — with trade-offs made explicit.
         </p>
 
-        <!-- Visible CTA Button -->
-        <a href="/freeze" class="cta-button">
-          Freeze a decision →
-        </a>
+        <!-- NEW: Free-write entry (low friction) -->
+        <div class="freewrite">
+          <p class="freewrite-label">What’s on your mind?</p>
+          <p class="freewrite-sub">
+            Just write everything down. Don’t organize it. Don’t decide yet.
+          </p>
+
+          <textarea id="freewriteText" placeholder="Write freely.
+Messy thoughts are welcome.
+You can rant, repeat yourself, or contradict yourself."></textarea>
+
+          <div class="freewrite-actions">
+            <button class="cta-button" id="btnSense">
+              Help me make sense of this →
+            </button>
+
+            <a class="secondary-link" href="/freeze" id="btnSkip">
+              I prefer the structured form →
+            </a>
+
+            <div class="hint">
+              You’re not making a decision yet. Next step: Plutox will organize what you wrote, then you can freeze it.
+            </div>
+          </div>
+        </div>
       </div>
 
       <div>
@@ -185,9 +268,9 @@
     <section class="block">
       <h2>How Decision Freezer works</h2>
       <ul>
-        <li>A small set of structured questions</li>
-        <li>Explicit assumptions and constraints</li>
-        <li>A single decision with clear trade-offs</li>
+        <li>Start with a free-write brain dump (no structure required)</li>
+        <li>Plutox organizes it into a clean decision shape</li>
+        <li>Then it freezes one decision with explicit trade-offs</li>
       </ul>
     </section>
 
@@ -198,6 +281,7 @@
         <li>A frozen decision</li>
         <li>The assumptions behind it</li>
         <li>What you are explicitly choosing to give up</li>
+        <li>A concrete 7-day plan</li>
       </ul>
     </section>
 
@@ -215,7 +299,33 @@
     </section>
 
     <footer>© Plutox</footer>
-
   </div>
+
+  <script>
+    // Store free-write text so /freeze can use it next.
+    // (Next step: we’ll update freeze.html to read this and auto-fill.)
+    const key = "plutox_freewrite_v1";
+    const ta = document.getElementById("freewriteText");
+    const btn = document.getElementById("btnSense");
+
+    // restore draft if user refreshes
+    try {
+      const saved = localStorage.getItem(key);
+      if (saved) ta.value = saved;
+    } catch (e) {}
+
+    ta.addEventListener("input", () => {
+      try { localStorage.setItem(key, ta.value); } catch (e) {}
+    });
+
+    btn.addEventListener("click", () => {
+      const text = (ta.value || "").trim();
+      try { localStorage.setItem(key, text); } catch (e) {}
+
+      // For now, route to the existing structured form.
+      // Next step: we’ll add a lightweight “organize” step before freeze.
+      window.location.href = "/freeze";
+    });
+  </script>
 </body>
 </html>
