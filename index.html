@@ -13,7 +13,7 @@
       line-height: 1.6;
     }
     .container {
-      max-width: 900px;
+      max-width: 960px;
       margin: 0 auto;
       padding: 80px 24px;
     }
@@ -33,19 +33,32 @@
       padding-left: 1.2rem;
     }
     .hero {
-      padding-bottom: 40px;
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 40px;
+      align-items: center;
+      padding-bottom: 60px;
       border-bottom: 1px solid #ddd;
+    }
+    .hero img {
+      width: 100%;
+      border-radius: 10px;
     }
     .tagline {
       font-size: 1.3rem;
       color: #444;
     }
+    .section-img {
+      width: 100%;
+      margin: 24px 0;
+      border-radius: 8px;
+    }
     .cta {
-      margin-top: 40px;
-      padding: 24px;
+      margin-top: 60px;
+      padding: 32px;
       background: #111;
       color: #fff;
-      border-radius: 8px;
+      border-radius: 10px;
     }
     .cta a {
       color: #fff;
@@ -56,6 +69,11 @@
       font-size: 0.9rem;
       color: #666;
     }
+    @media (max-width: 768px) {
+      .hero {
+        grid-template-columns: 1fr;
+      }
+    }
   </style>
 </head>
 
@@ -64,48 +82,69 @@
 
     <!-- Hero -->
     <section class="hero">
-      <h1>Plutox</h1>
-      <p class="tagline">
-        Turn vague ideas into clear, executable plans.
-      </p>
-      <p>
-        Plutox is not a chat bot.  
-        It is a structured AI assistant designed to produce <strong>usable outputs</strong>,
-        not conversations.
-      </p>
+      <div>
+        <h1>Plutox</h1>
+        <p class="tagline">
+          Turn vague ideas into clear, executable plans.
+        </p>
+        <p>
+          Plutox is a structured AI assistant designed for people
+          who want <strong>decisions and plans</strong>, not endless conversation.
+        </p>
+      </div>
+      <div>
+        <img
+          src="https://images.unsplash.com/photo-1559027615-cdcbf6e3d3c9?auto=format&fit=crop&w=900&q=80"
+          alt="Abstract strategy diagram"
+        />
+      </div>
     </section>
 
-    <!-- Who it is for -->
+    <!-- Who -->
     <section>
       <h2>Who is this for?</h2>
+      <img
+        class="section-img"
+        src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=1200&q=80"
+        alt="Decision making workflow"
+      />
       <ul>
-        <li>Builders who have ideas but need a concrete plan</li>
-        <li>Professionals who want answers in a fixed structure</li>
-        <li>People tired of vague, generic AI replies</li>
+        <li>Builders with ideas but no concrete plan</li>
+        <li>Professionals who want structured answers</li>
+        <li>People tired of generic AI responses</li>
       </ul>
     </section>
 
-    <!-- How it works -->
+    <!-- How -->
     <section>
       <h2>How Plutox works</h2>
+      <img
+        class="section-img"
+        src="https://images.unsplash.com/photo-1526378722484-cc5c510f9f8f?auto=format&fit=crop&w=1200&q=80"
+        alt="System flow diagram"
+      />
       <p>
-        Instead of open-ended chat, Plutox uses predefined questions
-        to guide your thinking.
+        Plutox replaces open-ended chat with a predefined reasoning framework.
       </p>
       <ul>
         <li>You answer a small set of focused questions</li>
-        <li>The agent follows a fixed reasoning framework</li>
-        <li>You receive a clear, opinionated output</li>
+        <li>The agent follows a fixed logic path</li>
+        <li>You receive a direct, opinionated output</li>
       </ul>
     </section>
 
     <!-- Output -->
     <section>
       <h2>What you get</h2>
+      <img
+        class="section-img"
+        src="https://images.unsplash.com/photo-1551836022-4c4c79ecde51?auto=format&fit=crop&w=1200&q=80"
+        alt="Minimal abstract tech"
+      />
       <ul>
-        <li>A concrete action plan</li>
-        <li>Clear assumptions and constraints</li>
-        <li>No fluff, no generic advice</li>
+        <li>Clear action steps</li>
+        <li>Explicit assumptions</li>
+        <li>No fluff, no vague advice</li>
       </ul>
     </section>
 
@@ -113,11 +152,9 @@
     <section class="cta">
       <h2>Coming next</h2>
       <p>
-        Plutox will soon support task-specific agents
-        for strategy, analysis, and decision-making.
+        Task-specific agents for strategy, analysis, and decision-making.
       </p>
       <p>
-        Interested?  
         Contact: <a href="mailto:hello@plutox.nz">hello@plutox.nz</a>
       </p>
     </section>
